@@ -42,7 +42,8 @@ class Match(models.Model):
         ('upcoming', 'Upcoming'),
         ('live', 'Live'),
         ('completed', 'Completed'),
-        ('cancelled', 'Cancelled')
+        ('cancelled', 'Cancelled'),
+        ('archived', 'Archived'),
     )
 
     title = models.CharField(max_length=200)

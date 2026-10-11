@@ -76,6 +76,6 @@ class MatchSerializer(serializers.ModelSerializer):
             'current_innings', 'current_over',
             'batting_team', 'batting_team_details',
             'bowling_team', 'bowling_team_details',
-            'player_innings', 'overs',
+            'player_innings',
             'created_at', 'updated_at'
         ]
