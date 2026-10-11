@@ -1,0 +1,265 @@
+/* Direct UI fix for Dream11 app */
+
+/* Global styles */
+body {
+  background-color: #f0f8ff !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Navbar */
+.navbar {
+  background: linear-gradient(to right, #1976d2, #2196f3) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  padding: 15px 0 !important;
+}
+
+.navbar-brand, .navbar .navbar-brand {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+.navbar-nav .nav-link, .navbar .nav-link {
+  color: rgba(255,255,255,0.9) !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  margin: 0 4px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
+}
+
+.navbar-nav .nav-link:hover, .navbar .nav-link:hover {
+  background-color: rgba(255,255,255,0.15) !important;
+  color: white !important;
+}
+
+/* Cards */
+.card {
+  border: none !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  margin-bottom: 24px !important;
+}
+
+.card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important;
+}
+
+.card-header {
+  background-color: rgba(33, 150, 243, 0.05) !important;
+  border-bottom: 1px solid rgba(33, 150, 243, 0.1) !important;
+  padding: 15px 20px !important;
+  font-weight: 600 !important;
+}
+
+.card-body {
+  padding: 20px !important;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 14px !important;
+}
+
+.btn-primary, .btn-primary:not(:disabled):not(.disabled) {
+  background-color: #2196f3 !important;
+  border-color: #2196f3 !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+  box-shadow: 0 5px 12px rgba(33, 150, 243, 0.35) !important;
+}
+
+/* Match cards */
+.match-card .team-name {
+  font-weight: 600 !important;
+  font-size: 18px !important;
+}
+
+.match-card .match-time {
+  font-size: 14px !important;
+  color: #546e7a !important;
+}
+
+.match-card .match-venue {
+  font-size: 14px !important;
+  color: #607d8b !important;
+}
+
+.match-card .badge {
+  padding: 8px 12px !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+}
+
+/* Team icons */
+.team-icon {
+  width: 60px !important;
+  height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(33, 150, 243, 0.1) !important;
+  border-radius: 50% !important;
+  margin: 0 auto 10px !important;
+}
+
+.team-icon-text {
+  font-weight: bold !important;
+  font-size: 18px !important;
+  color: #1976d2 !important;
+}
+
+/* Fix tables */
+.table {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+.table th {
+  background-color: rgba(33, 150, 243, 0.1) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px !important;
+  padding: 15px !important;
+  color: #37474f !important;
+}
+
+.table td {
+  padding: 15px !important;
+  vertical-align: middle !important;
+}
+
+/* User forms */
+.form-control {
+  padding: 12px 15px !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  border: 1px solid #e0e0e0 !important;
+  font-size: 15px !important;
+  transition: all 0.2s !important;
+}
+
+.form-control:focus {
+  border-color: #2196f3 !important;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15) !important;
+}
+
+/* Make footer sticky and styled */
+footer {
+  background-color: rgba(240, 248, 255, 0.8) !important;
+  border-top: 1px solid rgba(33, 150, 243, 0.1) !important;
+  padding: 30px 0 !important;
+  color: #455a64 !important;
+}
+
+footer h5 {
+  font-weight: 600 !important;
+  color: #37474f !important;
+  margin-bottom: 15px !important;
+}
+
+/* General text */
+h1, h2, h3, h4, h5, h6 {
+  color: #263238 !important;
+  font-weight: 600 !important;
+}
+
+a {
+  color: #2196f3 !important;
+  transition: color 0.2s !important;
+}
+
+a:hover {
+  color: #0d47a1 !important;
+  text-decoration: none !important;
+}
+
+/* Status badges */
+.badge-upcoming {
+  background-color: #42a5f5 !important;
+  color: white !important;
+}
+
+.badge-live {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+.badge-completed {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+/* Emergency mode banner */
+.emergency-banner {
+  background-color: rgba(255, 152, 0, 0.15) !important;
+  border-left: 4px solid #ff9800 !important;
+  padding: 15px 20px !important;
+  margin-bottom: 20px !important;
+  border-radius: 4px !important;
+}
+
+.emergency-banner i {
+  color: #ff9800 !important;
+  margin-right: 10px !important;
+}
+
+/* Force application of styles */
+* {
+  transition: all 0.2s ease !important;
+}
+
+/* Overrides for specific elements */
+.breadcrumb {
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin-bottom: 20px !important;
+}
+
+.breadcrumb-item a {
+  color: #2196f3 !important;
+}
+
+.breadcrumb-item.active {
+  color: #546e7a !important;
+}
+
+.list-group-item {
+  padding: 15px 20px !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.list-group-item:hover {
+  background-color: rgba(33, 150, 243, 0.03) !important;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 0 !important;
+  }
+  
+  .card-body {
+    padding: 15px !important;
+  }
+  
+  .btn {
+    padding: 8px 16px !important;
+  }
+}

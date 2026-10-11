@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ venue.name }} - Venue Details - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('venues') }}">Venues</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ venue.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ venue.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Venue Information</h5>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Name</th>
+                                        <td>{{ venue.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">City</th>
+                                        <td>{{ venue.city }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Country</th>
+                                        <td>{{ venue.country }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Capacity</th>
+                                        <td>{{ venue.capacity }} spectators</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Established</th>
+                                        <td>{{ venue.established_year }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Matches Played</th>
+                                        <td>{{ venue.matches_played }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Pitch Characteristics</h5>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Pitch Type</th>
+                                        <td>{{ venue.pitch_type }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Average 1st Innings Score</th>
+                                        <td>{{ venue.avg_first_innings_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Average 2nd Innings Score</th>
+                                        <td>{{ venue.avg_second_innings_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Highest Team Score</th>
+                                        <td>{{ venue.highest_team_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Lowest Team Score</th>
+                                        <td>{{ venue.lowest_team_score }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Pitch Behavior</th>
+                                        <td>
+                                            <span class="badge {% if venue.batting_friendly %}bg-success{% else %}bg-danger{% endif %}">
+                                                {% if venue.batting_friendly %}Batting Friendly{% else %}Bowling Friendly{% endif %}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Batting Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4">{{ venue.avg_runs_per_over }}</h3>
+                                    <p class="text-muted">Average Runs Per Over</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4">{{ venue.avg_boundaries_per_match }}</h3>
+                                    <p class="text-muted">Average Boundaries Per Match</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6>Batting Performance by Position</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Average</th>
+                                <th>Strike Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for position in range(1, 8) %}
+                            <tr>
+                                <td>{{ position }}</td>
+                                <td>{{ batting_stats.get(position, {}).get('average', 'N/A') }}</td>
+                                <td>{{ batting_stats.get(position, {}).get('strike_rate', 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Bowling Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4">{{ venue.avg_wickets_per_match }}</h3>
+                                    <p class="text-muted">Average Wickets Per Match</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h3 class="display-4">{{ venue.avg_economy_rate }}</h3>
+                                    <p class="text-muted">Average Economy Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6>Bowling Performance by Type</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Bowling Type</th>
+                                <th>Average</th>
+                                <th>Economy</th>
+                                <th>Strike Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type in bowling_stats %}
+                            <tr>
+                                <td>{{ type }}</td>
+                                <td>{{ bowling_stats[type].average }}</td>
+                                <td>{{ bowling_stats[type].economy }}</td>
+                                <td>{{ bowling_stats[type].strike_rate }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Matches at {{ venue.name }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_matches %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Match</th>
+                                        <th>Result</th>
+                                        <th>First Innings</th>
+                                        <th>Second Innings</th>
+                                        <th>Toss</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in recent_matches %}
+                                    <tr>
+                                        <td>{{ match.date.strftime('%d %b %Y') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=match.id) }}">
+                                                {{ match.team1 }} vs {{ match.team2 }}
+                                            </a>
+                                        </td>
+                                        <td>{{ match.result }}</td>
+                                        <td>{{ match.first_innings_score }}</td>
+                                        <td>{{ match.second_innings_score }}</td>
+                                        <td>{{ match.toss_winner }} ({{ match.toss_decision }})</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent matches found at this venue.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+/* Custom styles for Dream11 Prediction */
+
+/* Body styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7fbff;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar styles */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #2962ff;
+}
+
+.navbar .nav-link {
+    color: #444;
+    transition: color 0.2s;
+}
+
+.navbar .nav-link:hover {
+    color: #2962ff;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    background-color: #fff !important;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Button styles */
+.btn {
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #42a5f5 !important;
+    border-color: #42a5f5 !important;
+}
+
+.btn-primary:hover {
+    background-color: #1e88e5 !important;
+    border-color: #1e88e5 !important;
+}
+
+/* Hero section styles */
+.hero {
+    background: linear-gradient(45deg, #42a5f5, #80d6ff) !important;
+    color: #fff;
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+}
+
+/* List group styles */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #e3f2fd !important;
+    border-color: #90caf9 !important;
+    color: #0d47a1 !important;
+}
+
+/* Footer styles */
+footer {
+    background-color: #f1f1f1 !important;
+    color: #333 !important;
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+/* Form styles */
+.form-control {
+    border-radius: 5px;
+}
+
+.form-control:focus {
+    border-color: #2962ff;
+    box-shadow: 0 0 0 0.2rem rgba(41, 98, 255, 0.25);
+}
+
+/* Table styles */
+.table {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+.table thead th {
+    background-color: #e3f2fd !important;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 1em;
+}
+
+/* Icon styles */
+.fas {
+    color: #2962ff;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .hero {
+        padding: 2rem 0;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}

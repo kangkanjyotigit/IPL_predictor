@@ -1,0 +1,820 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ match.team1 }} vs {{ match.team2 }} - Dream11 Prediction{% endblock %}
+
+{% block extra_css %}
+<!-- Include CSS directly in page to avoid Flask routing issues -->
+<style>
+/* Match detail page styling */
+.match-header {
+    background: linear-gradient(45deg, #1976d2, #42a5f5);
+    color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.team-vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.team-container {
+    text-align: center;
+    padding: 15px;
+    flex: 1;
+}
+
+.team-logo {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.vs-badge {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin: 0 15px;
+}
+
+.match-info {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.match-info i {
+    margin-right: 10px;
+}
+
+.player-card {
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+    border: none !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05) !important;
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+.player-card .card-header {
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+.player-role {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.role-Batsman {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.role-Bowler {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.role-All-Rounder {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.role-Wicket-Keeper {
+    background-color: #f3e5f5;
+    color: #4a148c;
+}
+
+.status-badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.status-live {
+    background-color: #f44336;
+    color: white;
+}
+
+.status-upcoming {
+    background-color: #4caf50;
+    color: white;
+}
+
+.status-completed {
+    background-color: #607d8b;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('frontend.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('frontend.matches') }}">Matches</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ match.team1 }} vs {{ match.team2 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    {% if emergency_mode %}
+    <div class="alert alert-warning mb-4">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <strong>Emergency Mode:</strong> Using sample data while API data is unavailable.
+    </div>
+{% endif %}
+
+<div class="match-header">
+    <div class="team-vs-container">
+        <div class="team-container">
+            <div class="team-logo">{{ match.team1[:2] }}</div>
+            <h4>{{ match.team1 }}</h4>
+            {% if match.team1_score %}
+                <div class="score">{{ match.team1_score }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="vs-badge">VS</div>
+        
+        <div class="team-container">
+            <div class="team-logo">{{ match.team2[:2] }}</div>
+            <h4>{{ match.team2 }}</h4>
+            {% if match.team2_score %}
+                <div class="score">{{ match.team2_score }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="match-info">
+        <div class="mb-2">
+            <span class="status-badge status-{{ match.status }}">{{ match.status|upper }}</span>
+        </div>
+        <div class="mb-2">
+            <i class="far fa-calendar-alt"></i> {{ match.date.strftime('%d %b %Y, %H:%M') }}
+        </div>
+        <div class="mb-2">
+            <i class="fas fa-map-marker-alt"></i> {{ venue_name }}, {{ venue_city }}
+        </div>
+        <div class="mb-2">
+            <i class="fas fa-trophy"></i> {{ match.series_name }}
+        </div>
+        {% if match.result %}
+            <div>
+                <i class="fas fa-info-circle"></i> {{ match.result }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Match Details</h5>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Match Type</th>
+                                        <td>T20</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Start Time</th>
+                                        <td>{{ match.date.strftime('%d %b %Y, %H:%M') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Venue</th>
+                                        <td>{{ venue_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Location</th>
+                                        <td>{% if match.venue and match.venue.city %}{{ match.venue.city }}{% else %}TBD{% endif %}, {% if match.venue and match.venue.country %}{{ match.venue.country }}{% else %}TBD{% endif %}</td>
+                                    </tr>
+                                    {% if match.status == 'completed' %}
+                                    <tr>
+                                        <th scope="row">Result</th>
+                                        <td>{{ match.result }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Weather Forecast</h5>
+                            {% if weather %}
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Condition</th>
+                                            <td>{{ weather.condition }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Temperature</th>
+                                            <td>{{ weather.temperature }}°C</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Humidity</th>
+                                            <td>{{ weather.humidity }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Wind</th>
+                                            <td>{{ weather.wind_speed }} km/h, {{ weather.wind_direction }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Precipitation</th>
+                                            <td>{{ weather.precipitation }} mm</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <p class="text-muted">Weather information not available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Teams</h5>
+                            <div>
+                                {% if current_user.is_authenticated %}
+                                    <a href="{{ url_for('frontend.team_builder', match_id=match.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-plus-circle"></i> Create Team
+                                    </a>
+                                    <a href="{{ url_for('frontend.auto_generate_team', match_id=match.id) }}" class="btn btn-success btn-sm">
+                                        <i class="bi bi-magic"></i> Auto Generate
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('frontend.login', next=url_for('frontend.match_detail', match_id=match.id)) }}" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-box-arrow-in-right"></i> Login to Create Teams
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">AI-Powered Match Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="matchAnalysisTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="prediction-tab" data-bs-toggle="tab" data-bs-target="#prediction" 
+                                type="button" role="tab" aria-controls="prediction" aria-selected="true">
+                                Match Prediction
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="key-players-tab" data-bs-toggle="tab" data-bs-target="#key-players" 
+                                type="button" role="tab" aria-controls="key-players" aria-selected="false">
+                                Key Players
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pitch-analysis-tab" data-bs-toggle="tab" data-bs-target="#pitch-analysis" 
+                                type="button" role="tab" aria-controls="pitch-analysis" aria-selected="false">
+                                Pitch & Weather
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content pt-3" id="matchAnalysisTabsContent">
+                        <!-- Match Prediction Tab -->
+                        <div class="tab-pane fade show active" id="prediction" role="tabpanel" aria-labelledby="prediction-tab">
+                            {% if match_insights %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Match Win Probability</h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="fw-bold">{{ match.team1 }}</span>
+                                                    </div>
+                                                    <div class="text-center px-2">
+                                                        <span class="badge bg-secondary">vs</span>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="fw-bold">{{ match.team2 }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="progress mt-2">
+                                                    {% set team1_probability = 55 if match_insights.avg_fantasy_points_team1 > match_insights.avg_fantasy_points_team2 else 45 %}
+                                                    {% set team2_probability = 100 - team1_probability %}
+                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ team1_probability }}%;" aria-valuenow="{{ team1_probability }}" aria-valuemin="0" aria-valuemax="100">{{ team1_probability }}%</div>
+                                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ team2_probability }}%;" aria-valuenow="{{ team2_probability }}" aria-valuemin="0" aria-valuemax="100">{{ team2_probability }}%</div>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <small>{{ team1_probability }}%</small>
+                                                    <small>{{ team2_probability }}%</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Expected Score</h6>
+                                                <div class="row mt-2">
+                                                    <div class="col-6 text-center">
+                                                        <div class="p-2 rounded" style="background-color: rgba(13, 110, 253, 0.1);">
+                                                            <span class="d-block fw-bold text-dark">{{ match.team1 }}</span>
+                                                            <span class="display-6 fw-bold text-primary">{{ match_insights.expected_total_score }}</span>
+                                                            <small class="d-block text-muted">Projected Score</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 text-center">
+                                                        <div class="p-2 rounded" style="background-color: rgba(220, 53, 69, 0.1);">
+                                                            <span class="d-block fw-bold text-dark">{{ match.team2 }}</span>
+                                                            <span class="display-6 fw-bold text-danger">{{ match_insights.expected_total_score - 10 }}</span>
+                                                            <small class="d-block text-muted">Projected Score</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">AI Match Analysis</h6>
+                                                <p class="card-text">
+                                                    {{ match_insights.summary }}
+                                                </p>
+                                                <div class="mt-3 d-flex justify-content-center">
+                                                    <a href="{{ url_for('frontend.auto_generate_team', match_id=match.id) }}" class="btn btn-success">
+                                                        <i class="bi bi-stars me-1"></i> Generate Dream11 Team
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle-fill me-2"></i> 
+                                    Match prediction data is being processed. Check back soon for AI-powered predictions and analysis.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Key Players Tab -->
+                        <div class="tab-pane fade" id="key-players" role="tabpanel" aria-labelledby="key-players-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">{{ match.team1 }} Key Players</h6>
+                                    {% if team1_key_players %}
+                                        {% for player in team1_key_players %}
+                                            <div class="card mb-2">
+                                                <div class="card-body p-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6 class="mb-0">{{ player.name }}</h6>
+                                                            <small class="text-muted">{{ player.role }}</small>
+                                                        </div>
+                                                        <div>
+                                                            <span class="badge rounded-pill bg-success">{{ player.form * 10 | round(1) }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2 small">
+                                                        <p class="mb-1">{{ player.prediction_explanation }}</p>
+                                                        <div class="d-flex justify-content-between">
+                                                            <span class="badge rounded-pill bg-light text-dark">Credits: {{ player.credits }}</span>
+                                                            <span class="badge rounded-pill bg-primary">Predicted: {{ player.predicted_points | round(1) }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="alert alert-info">No key player data available yet</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">{{ match.team2 }} Key Players</h6>
+                                    {% if team2_key_players %}
+                                        {% for player in team2_key_players %}
+                                            <div class="card mb-2">
+                                                <div class="card-body p-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6 class="mb-0">{{ player.name }}</h6>
+                                                            <small class="text-muted">{{ player.role }}</small>
+                                                        </div>
+                                                        <div>
+                                                            <span class="badge rounded-pill bg-success">{{ player.form * 10 | round(1) }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2 small">
+                                                        <p class="mb-1">{{ player.prediction_explanation }}</p>
+                                                        <div class="d-flex justify-content-between">
+                                                            <span class="badge rounded-pill bg-light text-dark">Credits: {{ player.credits }}</span>
+                                                            <span class="badge rounded-pill bg-primary">Predicted: {{ player.predicted_points | round(1) }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="alert alert-info">No key player data available yet</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pitch Analysis Tab -->
+                        <div class="tab-pane fade" id="pitch-analysis" role="tabpanel" aria-labelledby="pitch-analysis-tab">
+                            {% if match_insights %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Pitch Analysis</h6>
+                                                <p class="card-text">{{ match_insights.pitch_analysis }}</p>
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item bg-light">
+                                                        <strong>Pitch Type:</strong> {{ match_insights.pitch_type }}
+                                                        <strong>Pitch Type:</strong> {{ match_prediction.pitch_type }}
+                                                    </li>
+                                                    <li class="list-group-item bg-light">
+                                                        <strong>Expected Bounce:</strong> {{ match_prediction.expected_bounce }}
+                                                    </li>
+                                                    <li class="list-group-item bg-light">
+                                                        <strong>Expected Turn:</strong> {{ match_prediction.expected_turn }}
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Weather Forecast</h6>
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div style="font-size: 2.5rem; margin-right: 15px;">
+                                                        <i class="bi {% if 'clear' in match_prediction.weather|lower %}bi-sun{% elif 'cloud' in match_prediction.weather|lower %}bi-cloud{% elif 'rain' in match_prediction.weather|lower %}bi-cloud-rain{% else %}bi-thermometer{% endif %}"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-0">{{ match_prediction.weather }}</h5>
+                                                        <p class="mb-0">
+                                                            <i class="bi bi-thermometer-half"></i> {{ match_prediction.temperature }}°C | 
+                                                            <i class="bi bi-moisture"></i> {{ match_prediction.humidity }}% Humidity
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <h6>Impact on Match</h6>
+                                                <p class="card-text">{{ match_prediction.weather_impact }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle-fill me-2"></i> 
+                                    Pitch and weather analysis is being processed. Check back closer to match time.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ match.team1 }} Squad</h5>
+                </div>
+                <div class="card-body">
+                    {% if team1_players %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Role</th>
+                                        <th>Credits</th>
+                                        <th>Form</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for player in team1_players %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('frontend.player_detail', player_id=player.id) }}">
+                                                    {{ player.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ player.player_type }}</td>
+                                            <td>{{ player.current_credit }}</td>
+                                            <td>
+                                                <div class="progress progress-sm">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ player.recent_form * 10 }}%" 
+                                                         aria-valuenow="{{ player.recent_form * 10 }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Squad information not available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ match.team2 }} Squad</h5>
+                </div>
+                <div class="card-body">
+                    {% if team2_players %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Role</th>
+                                        <th>Credits</th>
+                                        <th>Form</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for player in team2_players %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('frontend.player_detail', player_id=player.id) }}">
+                                                    {{ player.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ player.player_type }}</td>
+                                            <td>{{ player.current_credit }}</td>
+                                            <td>
+                                                <div class="progress progress-sm">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ player.recent_form * 10 }}%" 
+                                                         aria-valuenow="{{ player.recent_form * 10 }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Squad information not available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% block extrajs %}
+<!-- Add JavaScript for asynchronous loading of match analytics -->
+<script>
+    // Load analytics data asynchronously when the page is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show loading indicators
+        const loadingElements = document.querySelectorAll('.loading-indicator');
+        loadingElements.forEach(el => el.style.display = 'block');
+        
+        // Hide analytics containers until data is loaded
+        const analyticsContainers = document.querySelectorAll('.analytics-container');
+        analyticsContainers.forEach(el => el.style.display = 'none');
+        
+        // Fetch analytics data from the server
+        fetch('/match/{{ match.id }}/analytics')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update analytics sections with the data
+                    updateAnalytics(data.analytics);
+                    
+                    // Hide loading indicators
+                    loadingElements.forEach(el => el.style.display = 'none');
+                    
+                    // Show analytics containers
+                    analyticsContainers.forEach(el => el.style.display = 'block');
+                } else {
+                    // Show error message
+                    document.getElementById('analytics-error').textContent = 
+                        data.message || 'Failed to load match analytics';
+                    document.getElementById('analytics-error').style.display = 'block';
+                    
+                    // Hide loading indicators
+                    loadingElements.forEach(el => el.style.display = 'none');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analytics-error').textContent = 
+                    'Failed to load match analytics: ' + error.message;
+                document.getElementById('analytics-error').style.display = 'block';
+                
+                // Hide loading indicators
+                loadingElements.forEach(el => el.style.display = 'none');
+            });
+    });
+    
+    // Function to update analytics sections with data
+    function updateAnalytics(analytics) {
+        // Update match insights
+        if (analytics.match_insights) {
+            const matchSummary = document.getElementById('match-summary');
+            if (matchSummary) {
+                matchSummary.textContent = analytics.match_insights.summary;
+            }
+            
+            const team1Points = document.getElementById('team1-fantasy-points');
+            if (team1Points) {
+                team1Points.textContent = Math.round(analytics.match_insights.avg_fantasy_points_team1);
+            }
+            
+            const team2Points = document.getElementById('team2-fantasy-points');
+            if (team2Points) {
+                team2Points.textContent = Math.round(analytics.match_insights.avg_fantasy_points_team2);
+            }
+            
+            const expectedScore = document.getElementById('expected-score');
+            if (expectedScore) {
+                expectedScore.textContent = analytics.match_insights.expected_total_score;
+            }
+        }
+        
+        // Update win probability
+        if (analytics.win_probability) {
+            // Team 1 win probability
+            const team1WinProb = document.getElementById('team1-win-prob');
+            if (team1WinProb) {
+                team1WinProb.textContent = analytics.win_probability.team1 + '%';
+            }
+            
+            const team1WinBar = document.getElementById('team1-win-bar');
+            if (team1WinBar) {
+                team1WinBar.style.width = analytics.win_probability.team1 + '%';
+            }
+            
+            // Team 2 win probability
+            const team2WinProb = document.getElementById('team2-win-prob');
+            if (team2WinProb) {
+                team2WinProb.textContent = analytics.win_probability.team2 + '%';
+            }
+            
+            const team2WinBar = document.getElementById('team2-win-bar');
+            if (team2WinBar) {
+                team2WinBar.style.width = analytics.win_probability.team2 + '%';
+            }
+        }
+        
+        // Update pitch and weather analysis
+        if (analytics.pitch_analysis) {
+            const pitchAnalysis = document.getElementById('pitch-analysis');
+            if (pitchAnalysis) {
+                pitchAnalysis.textContent = analytics.pitch_analysis;
+            }
+        }
+        
+        if (analytics.weather_analysis) {
+            const weatherAnalysis = document.getElementById('weather-analysis');
+            if (weatherAnalysis) {
+                weatherAnalysis.textContent = analytics.weather_analysis;
+            }
+        }
+        
+        // Update strategy recommendation
+        if (analytics.strategy_recommendation) {
+            const strat = analytics.strategy_recommendation;
+            
+            // Add null checks for all DOM elements
+            const stratDesc = document.getElementById('strategy-description');
+            if (stratDesc) stratDesc.textContent = strat.description;
+            
+            const recBatsmen = document.getElementById('recommended-batsmen');
+            if (recBatsmen) recBatsmen.textContent = strat.batsmen;
+            
+            const recBowlers = document.getElementById('recommended-bowlers');
+            if (recBowlers) recBowlers.textContent = strat.bowlers;
+            
+            const recAllRounders = document.getElementById('recommended-all-rounders');
+            if (recAllRounders) recAllRounders.textContent = strat.all_rounders;
+            
+            const recKeepers = document.getElementById('recommended-keepers');
+            if (recKeepers) recKeepers.textContent = strat.wicket_keepers;
+            
+            const captainStrat = document.getElementById('captain-strategy');
+            if (captainStrat) captainStrat.textContent = strat.captain_strategy;
+            
+            const viceCaptainStrat = document.getElementById('vice-captain-strategy');
+            if (viceCaptainStrat) viceCaptainStrat.textContent = strat.vice_captain_strategy;
+        }
+        
+        // Update top players
+        if (analytics.top_players && analytics.top_players.length > 0) {
+            const topPlayersContainer = document.getElementById('top-players-container');
+            if (!topPlayersContainer) return; // Exit if container not found
+            
+            topPlayersContainer.innerHTML = ''; // Clear existing content
+            
+            analytics.top_players.forEach(player => {
+                try {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'col-md-6 mb-3';
+                    
+                    // Determine card and badge classes safely
+                    const cardClass = player.team_name === '{{ match.team1 }}' ? 'team1-card' : 'team2-card';
+                    const badgeClass = player.team_name === '{{ match.team1 }}' ? 'bg-primary' : 'bg-success';
+                    
+                    // Handle potential null or undefined values
+                    const playerName = player.name || 'Unknown Player';
+                    const playerTeam = player.team_name || 'Unknown Team';
+                    const playerRole = player.role || 'Unknown Role';
+                    const playerCredits = player.credits || 0;
+                    const predictedPoints = player.predicted_points || 0;
+                    const pointsWidth = Math.min(100, predictedPoints/1.5);
+                    
+                    // Create HTML with proper escaping for potential XSS
+                    playerCard.innerHTML = `
+                        <div class="card h-100 ${cardClass}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">${playerName}</h5>
+                                    <span class="badge ${badgeClass}">
+                                        ${playerTeam}
+                                    </span>
+                                </div>
+                                <div class="col-md-6">
+                                <p><strong>Venue:</strong> {{ venue_name }}</p>
+                                <p><strong>Status:</strong> <span class="badge {{ match.status == 'upcoming' ? 'bg-primary' : 'bg-success' }}">{{ match.status | title }}</span></p>
+                            </div>
+                                <p class="card-text">
+                                    <strong>Role:</strong> ${playerRole}<br>
+                                    <strong>Credits:</strong> ${playerCredits}<br>
+                                    <strong>Predicted Points:</strong> ${Math.round(predictedPoints)}
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                            style="width: ${pointsWidth}%" 
+                                            aria-valuenow="${predictedPoints}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </p>
+                                ${player.prediction_explanation ? `<p class="card-text small text-muted">${player.prediction_explanation}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    topPlayersContainer.appendChild(playerCard);
+                } catch (err) {
+                    console.error('Error creating player card:', err);
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

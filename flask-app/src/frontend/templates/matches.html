@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Matches - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Cricket Matches</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Live Matches</h5>
+                </div>
+                <div class="card-body">
+                    {% if live_matches %}
+                        <div class="row">
+                            {% for match in live_matches %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-danger">LIVE</span>
+                                            <span>T20</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-geo-alt"></i> {{ match.venue.name if match.venue else 'TBD' }}
+                                                </small>
+                                            </p>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-outline-primary">View Details</a>
+                                                {% if current_user.is_authenticated %}
+                                                    <a href="{{ url_for('frontend.team_builder', match_id=match.id) }}" class="btn btn-primary">Create Team</a>
+                                                {% else %}
+                                                    <a href="{{ url_for('frontend.login', next=url_for('frontend.team_builder', match_id=match.id)) }}" class="btn btn-secondary">Login to Create Team</a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No live matches at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Upcoming Matches</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_matches %}
+                        <div class="row">
+                            {% for match in upcoming_matches %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-success">UPCOMING</span>
+                                            <span>T20</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar"></i> {{ match.date.strftime('%d %b, %H:%M') }}<br>
+                                                    <i class="bi bi-geo-alt"></i> {{ match.venue.name if match.venue else 'TBD' }}
+                                                </small>
+                                            </p>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-outline-primary">View Details</a>
+                                                {% if current_user.is_authenticated %}
+                                                    <a href="{{ url_for('frontend.team_builder', match_id=match.id) }}" class="btn btn-primary">Create Team</a>
+                                                {% else %}
+                                                    <a href="{{ url_for('frontend.login', next=url_for('frontend.team_builder', match_id=match.id)) }}" class="btn btn-secondary">Login to Create Team</a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming matches scheduled.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Completed Matches</h5>
+                </div>
+                <div class="card-body">
+                    {% if completed_matches %}
+                        <div class="row">
+                            {% for match in completed_matches %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-secondary">COMPLETED</span>
+                                            <span>T20</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar"></i> {{ match.date.strftime('%d %b, %H:%M') }}<br>
+                                                    <i class="bi bi-geo-alt"></i> {{ match.venue.name if match.venue else 'TBD' }}
+                                                </small>
+                                            </p>
+                                            <p class="card-text">
+                                                <strong>Result:</strong> {{ match.result }}
+                                            </p>
+                                            <div class="mt-3">
+                                                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-outline-primary w-100">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No completed matches found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

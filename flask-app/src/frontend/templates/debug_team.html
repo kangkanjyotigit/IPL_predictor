@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Debug Team Generation{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <h4>Debug Mode</h4>
+        <p>This is a debug page for team generation. You can use this to troubleshoot issues with the auto-generate team feature.</p>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Team Generation Parameters</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                {% for key, value in params.items() %}
+                    {% if key != 'db' %}
+                        <dt class="col-sm-3">{{ key }}</dt>
+                        <dd class="col-sm-9">{{ value }}</dd>
+                    {% endif %}
+                {% endfor %}
+            </dl>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5>Generated Team: {{ team.name }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Team Details</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Team ID</th>
+                            <td>{{ team.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Match</th>
+                            <td>{{ match.team1 }} vs {{ match.team2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Captain</th>
+                            <td>{{ captain.name }} ({{ captain.team_name }})</td>
+                        </tr>
+                        <tr>
+                            <th>Vice Captain</th>
+                            <td>{{ vice_captain.name }} ({{ vice_captain.team_name }})</td>
+                        </tr>
+                        {% if total_credits is defined %}
+                        <tr>
+                            <th>Total Credits</th>
+                            <td>{{ total_credits|round(2) }} {% if total_credits > 100 %}<span class="badge bg-danger">Exceeds Limit!</span>{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                        {% if team_counts is defined %}
+                        <tr>
+                            <th>Team Distribution</th>
+                            <td>
+                                {% for team_name, count in team_counts.items() %}
+                                    {{ team_name }}: {{ count }} players<br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Team Composition</h5>
+                    <div id="roleChart" style="height: 300px;"></div>
+                    {% if role_counts is defined %}
+                    <div class="mt-3">
+                        <h6>Role Distribution</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for role, count in role_counts.items() %}
+                                <tr>
+                                    <td>{{ role }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ (count / 11 * 100)|round }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <h5 class="mt-4">Selected Players</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Team</th>
+                            <th>Role</th>
+                            <th>Credits</th>
+                            <th>Form</th>
+                            <th>Captain/VC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tp, player in team_players %}
+                        <tr>
+                            <td>{{ player.id }}</td>
+                            <td>{{ player.name }}</td>
+                            <td>{{ player.team_name }}</td>
+                            <td>{{ player.role }}</td>
+                            <td>{{ player.credit_points }}</td>
+                            <td>{{ player.current_form }}</td>
+                            <td>
+                                {% if player.id == team.captain_id %}
+                                <span class="badge bg-success">Captain</span>
+                                {% elif player.id == team.vice_captain_id %}
+                                <span class="badge bg-primary">Vice Captain</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-primary">Back to Match</a>
+                <a href="{{ url_for('frontend.auto_generate_team', match_id=match.id) }}" class="btn btn-success">Go to Auto-Generate Team</a>
+                <a href="{{ url_for('frontend.debug_auto_generate', match_id=match.id) }}" class="btn btn-warning">Run Debug Again</a>
+                <a href="{{ url_for('frontend.populate_test_data') }}" class="btn btn-info">Populate Test Data</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create array of player data from template
+    var teamPlayers = [];
+    
+    // Safely parse player data from server-side
+    {% for tp, player in team_players %}
+    teamPlayers.push({
+        "id": {{ player.id }},
+        "name": "{{ player.name|safe }}",
+        "team": "{{ player.team_name|safe }}",
+        "role": "{{ player.role|safe }}"
+    });
+    {% endfor %}
+    
+    // Count players by role
+    var roleCount = {};
+    for (var i = 0; i < teamPlayers.length; i++) {
+        var player = teamPlayers[i];
+        var role = player.role;
+        if (roleCount[role]) {
+            roleCount[role]++;
+        } else {
+            roleCount[role] = 1;
+        }
+    }
+    
+    // Create chart data
+    var labels = [];
+    var data = [];
+    
+    // Convert object to arrays for Chart.js
+    for (var role in roleCount) {
+        if (roleCount.hasOwnProperty(role)) {
+            labels.push(role);
+            data.push(roleCount[role]);
+        }
+    }
+    
+    // Create chart if we have data
+    var ctx = document.getElementById('roleChart');
+    if (ctx && labels.length > 0) {
+        try {
+            var myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Team Composition by Role'
+                        }
+                    }
+                }
+            });
+            console.log('Chart created successfully');
+        } catch (error) {
+            console.error('Error creating chart:', error);
+            var errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'Error creating chart: ' + error.message;
+            if (ctx.parentNode) {
+                ctx.parentNode.replaceChild(errorDiv, ctx);
+            }
+        }
+    } else if (ctx) {
+        console.warn('No data available for chart');
+        var warningDiv = document.createElement('div');
+        warningDiv.className = 'alert alert-warning';
+        warningDiv.textContent = 'No data available to create chart';
+        if (ctx.parentNode) {
+            ctx.parentNode.replaceChild(warningDiv, ctx);
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ player.name }} - Player Profile - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('players') }}">Players</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ player.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Player Profile</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="player-avatar mb-3">
+                            <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+                        </div>
+                        <h3>{{ player.name }}</h3>
+                        <p class="text-muted">{{ player.team.name }}</p>
+                        <div class="badge bg-primary mb-2">{{ player.player_type }}</div>
+                        <div class="star-rating mb-3">
+                            {% for i in range(5) %}
+                                {% if i < player.rating|int %}
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                    <i class="bi bi-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Country</th>
+                                <td>{{ player.country }}</td>
+                            </tr>
+                            <tr>
+                                <th>Age</th>
+                                <td>{{ player.age }}</td>
+                            </tr>
+                            <tr>
+                                <th>Current Credit</th>
+                                <td>{{ player.current_credit }}</td>
+                            </tr>
+                            <tr>
+                                <th>Recent Form</th>
+                                <td>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ player.recent_form * 10 }}%;" aria-valuenow="{{ player.recent_form * 10 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Performance Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Batting Stats</h6>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th>Matches</th>
+                                        <td>{{ player_stats.batting_matches }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Runs</th>
+                                        <td>{{ player_stats.total_runs }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Average</th>
+                                        <td>{{ player_stats.batting_average }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Strike Rate</th>
+                                        <td>{{ player_stats.batting_strike_rate }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>50s / 100s</th>
+                                        <td>{{ player_stats.fifties }} / {{ player_stats.hundreds }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Bowling Stats</h6>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th>Wickets</th>
+                                        <td>{{ player_stats.total_wickets }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Economy</th>
+                                        <td>{{ player_stats.economy }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Average</th>
+                                        <td>{{ player_stats.bowling_average }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Strike Rate</th>
+                                        <td>{{ player_stats.bowling_strike_rate }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>5 Wicket Hauls</th>
+                                        <td>{{ player_stats.five_wicket_hauls }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Performances</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_performances %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Match</th>
+                                        <th>Runs</th>
+                                        <th>Wickets</th>
+                                        <th>Dream11 Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perf in recent_performances %}
+                                    <tr>
+                                        <td>{{ perf.match.date.strftime('%d %b %Y') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=perf.match.id) }}">
+                                                {{ perf.match.team1 }} vs {{ perf.match.team2 }}
+                                            </a>
+                                        </td>
+                                        <td>{{ perf.runs }}</td>
+                                        <td>{{ perf.wickets }}</td>
+                                        <td>{{ perf.points }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent performance data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Performance Prediction</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_matches %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Upcoming Match</th>
+                                        <th>Date</th>
+                                        <th>Venue</th>
+                                        <th>Predicted Runs</th>
+                                        <th>Predicted Wickets</th>
+                                        <th>Predicted Points</th>
+                                        <th>Selection %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match, prediction in upcoming_predictions %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=match.id) }}">
+                                                {{ match.team1 }} vs {{ match.team2 }}
+                                            </a>
+                                        </td>
+                                        <td>{{ match.date.strftime('%d %b %Y') }}</td>
+                                        <td>{{ match.venue.name if match.venue else 'TBD' }}</td>
+                                        <td>{{ prediction.predicted_runs }}</td>
+                                        <td>{{ prediction.predicted_wickets }}</td>
+                                        <td>{{ prediction.predicted_points }}</td>
+                                        <td>{{ prediction.selection_percentage }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming matches found for prediction.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

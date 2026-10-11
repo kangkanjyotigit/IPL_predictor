@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">User Profile</h1>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div class="user-avatar mb-3">
+                                    <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+                                </div>
+                                <h3>{{ user.username }}</h3>
+                                <p class="text-muted">Member since {{ user.created_at.strftime('%B %Y') }}</p>
+                            </div>
+                            
+                            <form method="POST" action="{{ url_for('profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="full_name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}">
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="form_type" value="password">
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Change Password</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Performance Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card text-center mb-3">
+                                        <div class="card-body">
+                                            <h3 class="display-4">{{ stats.total_teams }}</h3>
+                                            <p class="text-muted">Teams Created</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center mb-3">
+                                        <div class="card-body">
+                                            <h3 class="display-4">{{ stats.matches_participated }}</h3>
+                                            <p class="text-muted">Matches Played</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center mb-3">
+                                        <div class="card-body">
+                                            <h3 class="display-4">{{ stats.avg_points }}</h3>
+                                            <p class="text-muted">Average Points</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center mb-3">
+                                        <div class="card-body">
+                                            <h3 class="display-4">{{ stats.win_percentage }}%</h3>
+                                            <p class="text-muted">Win Percentage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h6>Favorite Players</h6>
+                                    <ul class="list-group">
+                                        {% for player in favorite_players %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('player_detail', player_id=player.id) }}">
+                                                {{ player.name }}
+                                            </a>
+                                            <span class="badge bg-primary rounded-pill">Selected {{ player.selection_count }} times</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Preferred Team Composition</h6>
+                                    <ul class="list-group">
+                                        {% for comp in preferred_compositions %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ comp.composition }}
+                                            <span class="badge bg-primary rounded-pill">Used {{ comp.usage_count }} times</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Recent Teams</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_teams %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Team Name</th>
+                                                <th>Match</th>
+                                                <th>Date</th>
+                                                <th>Points</th>
+                                                <th>Rank</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for team in recent_teams %}
+                                            <tr>
+                                                <td>{{ team.name }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('match_detail', match_id=team.match.id) }}">
+                                                        {{ team.match.team1 }} vs {{ team.match.team2 }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ team.created_at.strftime('%d %b %Y') }}</td>
+                                                <td>{{ team.points if team.points else 'N/A' }}</td>
+                                                <td>{{ team.rank if team.rank else 'N/A' }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('team_detail', team_id=team.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">You haven't created any teams yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

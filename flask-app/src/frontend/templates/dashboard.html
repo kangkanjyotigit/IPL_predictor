@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Your Stats</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Teams Created:</span>
+                        <span class="badge bg-primary">{{ teams|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Predictions Made:</span>
+                        <span class="badge bg-success">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Win Rate:</span>
+                        <span class="badge bg-info">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Matches</h5>
+                    {% if upcoming_matches %}
+                        <div class="list-group">
+                            {% for match in upcoming_matches %}
+                                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ match.team1 }} vs {{ match.team2 }}</h6>
+                                        <small>{{ match.date.strftime('%d %b, %H:%M') }}</small>
+                                    </div>
+                                    <small>T20 | {{ match.venue.name if match.venue else 'TBD' }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming matches found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Your Teams</h5>
+                </div>
+                <div class="card-body">
+                    {% if teams %}
+                        <ul class="nav nav-tabs mb-3" id="teamsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-teams-tab" data-bs-toggle="tab" data-bs-target="#all-teams" type="button" role="tab" aria-controls="all-teams" aria-selected="true">All Teams</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="manual-teams-tab" data-bs-toggle="tab" data-bs-target="#manual-teams" type="button" role="tab" aria-controls="manual-teams" aria-selected="false">Manual Teams</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="auto-teams-tab" data-bs-toggle="tab" data-bs-target="#auto-teams" type="button" role="tab" aria-controls="auto-teams" aria-selected="false">Auto-Generated</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="teamsTabContent">
+                            <div class="tab-pane fade show active" id="all-teams" role="tabpanel" aria-labelledby="all-teams-tab">
+                                <div class="list-group">
+                                    {% for team in teams %}
+                                        <a href="{{ url_for('frontend.match_detail', match_id=team.match_id) }}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ team.name }}</h6>
+                                                <small>{{ team.created_at.strftime('%d %b') if team.created_at else 'N/A' }}</small>
+                                            </div>
+                                            <small>
+                                                {% if team.name.startswith('Auto') %}
+                                                <span class="badge bg-info text-dark">Auto-Generated</span>
+                                                {% endif %}
+                                                Match: {{ team.match.team1 }} vs {{ team.match.team2 }}
+                                            </small>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="manual-teams" role="tabpanel" aria-labelledby="manual-teams-tab">
+                                <div class="list-group">
+                                    {% for team in teams if not team.name.startswith('Auto') %}
+                                        <a href="{{ url_for('frontend.match_detail', match_id=team.match_id) }}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ team.name }}</h6>
+                                                <small>{{ team.created_at.strftime('%d %b') if team.created_at else 'N/A' }}</small>
+                                            </div>
+                                            <small>Match: {{ team.match.team1 }} vs {{ team.match.team2 }}</small>
+                                        </a>
+                                    {% else %}
+                                        <div class="alert alert-info">No manually created teams yet</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="auto-teams" role="tabpanel" aria-labelledby="auto-teams-tab">
+                                <div class="list-group">
+                                    {% for team in teams if team.name.startswith('Auto') %}
+                                        <a href="{{ url_for('frontend.match_detail', match_id=team.match_id) }}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ team.name }}</h6>
+                                                <small>{{ team.created_at.strftime('%d %b') if team.created_at else 'N/A' }}</small>
+                                            </div>
+                                            <small>Match: {{ team.match.team1 }} vs {{ team.match.team2 }}</small>
+                                        </a>
+                                    {% else %}
+                                        <div class="alert alert-info">No auto-generated teams yet. Try our <a href="{{ url_for('frontend.matches') }}">auto-generate feature</a> to create one!</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            You haven't created any teams yet. Go to <a href="{{ url_for('frontend.matches') }}">Matches</a> to create your first team!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Match Results</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_matches %}
+                        <div class="list-group">
+                            {% for match in recent_matches %}
+                                <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ match.team1 }} vs {{ match.team2 }}</h6>
+                                        <small>{{ match.date.strftime('%d %b') }}</small>
+                                    </div>
+                                    <small>
+                                        {{ match.team1_score }} - {{ match.team2_score }} | 
+                                        Winner: {{ match.winner }}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent match results found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

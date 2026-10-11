@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Team Details - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ team.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">{{ team.name }}</h4>
+                        <span class="badge bg-info">{{ team.match.team1 }} vs {{ team.match.team2 }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Team Information</h5>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th>Created By</th>
+                                        <td>{{ team.user.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Match</th>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=team.match.id) }}">
+                                                {{ team.match.team1 }} vs {{ team.match.team2 }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Created On</th>
+                                        <td>{{ team.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total Credits Used</th>
+                                        <td>{{ team.total_credits }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Team Performance</h5>
+                            {% if team.match.status == 'completed' and team.points %}
+                                <div class="text-center mb-3">
+                                    <h2 class="display-4">{{ team.points }} pts</h2>
+                                    <p class="text-muted">Total Points Earned</p>
+                                </div>
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ (team.rank_percentile) }}%;" 
+                                         aria-valuenow="{{ team.rank_percentile }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        Top {{ team.rank_percentile }}%
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <p class="mb-0">Match not completed yet. Performance stats will be available after the match.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Team Players</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>Role</th>
+                                    <th>Credits</th>
+                                    <th>Captain/VC</th>
+                                    {% if team.match.status == 'completed' %}
+                                    <th>Points</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in team.players %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('player_detail', player_id=player.id) }}">
+                                            {{ player.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ player.team }}</td>
+                                    <td>{{ player.player_type }}</td>
+                                    <td>{{ player.current_credit }}</td>
+                                    <td>
+                                        {% if player.id == team.captain_id %}
+                                            <span class="badge bg-primary">Captain</span>
+                                        {% elif player.id == team.vice_captain_id %}
+                                            <span class="badge bg-secondary">Vice Captain</span>
+                                        {% endif %}
+                                    </td>
+                                    {% if team.match.status == 'completed' %}
+                                    <td>
+                                        {% set performance = player_performances.get(player.id, {}) %}
+                                        {% if performance %}
+                                            {% if player.id == team.captain_id %}
+                                                {{ performance.points * 2 }}
+                                            {% elif player.id == team.vice_captain_id %}
+                                                {{ performance.points * 1.5 }}
+                                            {% else %}
+                                                {{ performance.points }}
+                                            {% endif %}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

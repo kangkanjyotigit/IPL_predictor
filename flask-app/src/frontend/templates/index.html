@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Hero Section -->
+    <div class="col-12 mb-4">
+        <div class="bg-primary text-white p-5 rounded">
+            <h1>Welcome to Dream11 Prediction</h1>
+            <p class="lead">Your AI-powered fantasy cricket assistant that helps you make data-driven decisions.</p>
+            {% if not session.get('user_id') %}
+                <a href="{{ url_for('frontend.register') }}" class="btn btn-light btn-lg me-2">Get Started</a>
+                <a href="{{ url_for('frontend.login') }}" class="btn btn-outline-light btn-lg">Login</a>
+            {% else %}
+                <a href="{{ url_for('frontend.dashboard') }}" class="btn btn-light btn-lg">Go to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Live Matches -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">Live Matches</h5>
+            </div>
+            <div class="card-body">
+                {% if live_matches %}
+                    <div class="list-group">
+                        {% for match in live_matches %}
+                            <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ match.team1 }} vs {{ match.team2 }}</h6>
+                                        <small class="text-muted">{{ match.venue.name }}</small>
+                                    </div>
+                                    <span class="badge bg-danger">LIVE</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No live matches at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Matches -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Upcoming Matches</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_matches %}
+                    <div class="list-group">
+                        {% for match in upcoming_matches %}
+                            <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ match.team1 }} vs {{ match.team2 }}</h6>
+                                        <small class="text-muted">{{ match.venue.name }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ match.date.strftime('%d %b, %H:%M') }}</small>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No upcoming matches scheduled.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Why Choose Us -->
+    <div class="col-12">
+        <h2 class="text-center mb-4">Why Choose Dream11 Prediction?</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Data-Driven Predictions</h5>
+                        <p class="card-text">Our AI algorithms analyze player performance, pitch conditions, and historical data to provide accurate predictions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Player Analysis</h5>
+                        <p class="card-text">Get detailed insights on player form, match-ups, and performance in different conditions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-trophy fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Winning Strategies</h5>
+                        <p class="card-text">Learn expert strategies and tips to maximize your chances of winning in fantasy cricket.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

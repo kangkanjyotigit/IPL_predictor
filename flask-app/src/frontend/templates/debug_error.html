@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Debug Error{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-danger">
+        <h4>Debug Error</h4>
+        <p>An error occurred during team generation in debug mode.</p>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5>Error Details</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Error:</strong> {{ error }}</p>
+            {% if match %}
+                <p><strong>Match:</strong> {{ match.team1 }} vs {{ match.team2 }}</p>
+                <p><strong>Match ID:</strong> {{ match.id }}</p>
+                <p><strong>Match Status:</strong> {{ match.status }}</p>
+                <p><strong>Match Date:</strong> {{ match.date }}</p>
+            {% endif %}
+            
+            {% if traceback %}
+                <div class="mt-3">
+                    <h6>Traceback:</h6>
+                    <pre class="bg-light p-3"><code>{{ traceback }}</code></pre>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if params %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Team Generation Parameters</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                {% for key, value in params.items() %}
+                    {% if key != 'db' %}
+                        <dt class="col-sm-3">{{ key }}</dt>
+                        <dd class="col-sm-9">{{ value }}</dd>
+                    {% endif %}
+                {% endfor %}
+            </dl>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if team1_players or team2_players %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5>Player Diagnostics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if team1_players %}
+                <div class="col-md-6">
+                    <h6>{{ match.team1 }} Players ({{ team1_players|length }})</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Credits</th>
+                                    <th>Form</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in team1_players %}
+                                <tr>
+                                    <td>{{ player.name }}</td>
+                                    <td>{{ player.role }}</td>
+                                    <td>{{ player.credit_points }}</td>
+                                    <td>{{ player.current_form }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if team2_players %}
+                <div class="col-md-6">
+                    <h6>{{ match.team2 }} Players ({{ team2_players|length }})</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Credits</th>
+                                    <th>Form</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in team2_players %}
+                                <tr>
+                                    <td>{{ player.name }}</td>
+                                    <td>{{ player.role }}</td>
+                                    <td>{{ player.credit_points }}</td>
+                                    <td>{{ player.current_form }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if team1_roles or team2_roles %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h6>Role Distribution</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    {% if team1_roles %}<th>{{ match.team1 }}</th>{% endif %}
+                                    {% if team2_roles %}<th>{{ match.team2 }}</th>{% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set all_roles = (team1_roles.keys()|list + team2_roles.keys()|list)|unique %}
+                                {% for role in all_roles %}
+                                <tr>
+                                    <td>{{ role }}</td>
+                                    {% if team1_roles %}<td>{{ team1_roles.get(role, 0) }}</td>{% endif %}
+                                    {% if team2_roles %}<td>{{ team2_roles.get(role, 0) }}</td>{% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        {% if match %}
+            <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-primary">Back to Match</a>
+            <a href="{{ url_for('frontend.auto_generate_team', match_id=match.id) }}" class="btn btn-success">Try Regular Auto-Generate</a>
+            <a href="{{ url_for('frontend.populate_test_data') }}" class="btn btn-warning">Populate Test Data</a>
+        {% else %}
+            <a href="{{ url_for('frontend.matches') }}" class="btn btn-primary">Back to Matches</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

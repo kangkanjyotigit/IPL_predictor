@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream11 Prediction - {% block title %}{% endblock %}</title>
+    
+    <!-- Bootstrap 4 CSS (First) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome 5 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Our CSS files with absolute paths to avoid Flask routing issues -->
+    <link rel="stylesheet" href="/static/css/modern.css?v={{ range(1, 10000) | random }}">
+    <!-- Direct UI fix with highest priority and simple cache busting -->
+    <link rel="stylesheet" href="/static/css/fix.css?v={{ range(10000, 20000) | random }}">
+    
+    <!-- Inline critical CSS that will ALWAYS apply -->
+    <style>
+        /* Base critical styles */
+        body {
+            background-color: #f0f8ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Navbar styles */
+        .navbar {
+            background: linear-gradient(to right, #1976d2, #2196f3) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 12px 0;
+        }
+        
+        .navbar-brand, .navbar-light .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .navbar-light .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-light .navbar-nav .nav-link:hover,
+        .navbar-light .navbar-nav .active .nav-link {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        /* Card styles */
+        .card {
+            border: none !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            margin-bottom: 24px !important;
+            overflow: hidden !important;
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: #2196f3 !important;
+            border-color: #2196f3 !important;
+        }
+        
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #1976d2 !important;
+            border-color: #1976d2 !important;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3) !important;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('frontend.index') }}">Dream11 Prediction</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.matches') }}">Matches</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.players') }}">Players</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.venues') }}">Venues</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.analytics') }}">Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.strategy') }}">Strategy Guide</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if session.get('user_id') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('frontend.dashboard') }}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('frontend.profile') }}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('frontend.logout') }}">Logout</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="{{ url_for('frontend.login', force_logout=1) }}" title="Force logout and show login page"><i class="bi bi-box-arrow-in-right"></i> Force Login</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('frontend.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('frontend.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Authentication Status Indicator (for debugging) -->
+        <div id="auth-status-indicator" class="alert alert-info alert-dismissible fade show" role="alert" style="display: none;">
+            <strong>Auth Status:</strong> <span id="auth-status-text"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Dream11 Prediction</h5>
+                    <p>Your AI-powered fantasy cricket assistant</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 Dream11 Prediction. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('frontend.static', filename='js/main.js') }}"></script>
+    
+    <!-- Authentication Status Indicator -->
+    {% if session.get('user_id') %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const authStatusIndicator = document.getElementById('auth-status-indicator');
+                const authStatusText = document.getElementById('auth-status-text');
+                
+                if (authStatusIndicator && authStatusText) {
+                    authStatusIndicator.style.display = 'block';
+                    authStatusIndicator.classList.add('alert-success');
+                    authStatusText.textContent = 'Logged in as {{ session.get("username", "Unknown") }} (session active)';
+                    console.log('Current cookies:', document.cookie);
+                    console.log('Authentication status: Authenticated');
+                }
+            });
+        </script>
+    {% else %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const authStatusIndicator = document.getElementById('auth-status-indicator');
+                const authStatusText = document.getElementById('auth-status-text');
+                
+                if (authStatusIndicator && authStatusText) {
+                    authStatusIndicator.style.display = 'block';
+                    authStatusIndicator.classList.add('alert-warning');
+                    authStatusText.textContent = 'Not logged in (no active session)';
+                    console.log('Current cookies:', document.cookie);
+                    console.log('Authentication status: Not authenticated');
+                }
+            });
+        </script>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

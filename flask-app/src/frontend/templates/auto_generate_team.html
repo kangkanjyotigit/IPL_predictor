@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Auto Generate Team{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Auto Generate Team</h1>
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if generated %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Generated Team: {{ team.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Team Details</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Captain</th>
+                                    <td>{{ captain.name }} ({{ captain.team_name }})</td>
+                                </tr>
+                                <tr>
+                                    <th>Vice Captain</th>
+                                    <td>{{ vice_captain.name }} ({{ vice_captain.team_name }})</td>
+                                </tr>
+                                <tr>
+                                    <th>Total Credits</th>
+                                    <td>{{ total_credits|round(2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Average Form</th>
+                                    <td>{{ avg_form|round(2) }}</td>
+                                </tr>
+                            </table>
+                            
+                            <h5>Team Distribution</h5>
+                            <div class="progress-container">
+                                {% for team_name, count in team_distribution.items() %}
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>{{ team_name }}</span>
+                                        <span>{{ count }} players</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ (count / 11 * 100)|round }}%"
+                                             data-percentage="{{ (count / 11 * 100)|round }}" 
+                                             aria-valuenow="{{ count }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="11">
+                                            {{ (count / 11 * 100)|round }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h4>Team Composition</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="teamCompositionChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Players List -->
+                    <h5 class="mt-4">Selected Players</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Role</th>
+                                    <th>Credits</th>
+                                    <th>Form</th>
+                                    <th>Captain/VC</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tp, player in team_players %}
+                                <tr>
+                                    <td>{{ player.name }}</td>
+                                    <td>{{ player.team_name }}</td>
+                                    <td>{{ player.role }}</td>
+                                    <td>{{ player.credit_points }}</td>
+                                    <td>{{ player.current_form }}</td>
+                                    <td>
+                                        {% if player.id == team.captain_id %}
+                                        <span class="badge bg-success">Captain</span>
+                                        {% elif player.id == team.vice_captain_id %}
+                                        <span class="badge bg-primary">Vice Captain</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">AI Match Insights</h4>
+                        <small><i class="bi bi-lightning-fill"></i> Powered by advanced analytics</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3 border-0 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-graph-up"></i> Match Overview</h5>
+                                    <p>{{ match.team1 }} vs {{ match.team2 }} - {{ match.date.strftime('%d %b %Y') }}</p>
+                                    
+                                    {% if match_insights %}
+                                        <p>{{ match_insights.summary }}</p>
+                                        <div class="d-flex justify-content-between text-center mt-3">
+                                            <div>
+                                                <h4>{{ match_insights.avg_fantasy_points_team1|round|int }}</h4>
+                                                <small class="text-muted">Avg. Points<br>{{ match.team1 }}</small>
+                                            </div>
+                                            <div>
+                                                <h4>{{ match_insights.expected_total_score|round|int }}</h4>
+                                                <small class="text-muted">Expected<br>Total Score</small>
+                                            </div>
+                                            <div>
+                                                <h4>{{ match_insights.avg_fantasy_points_team2|round|int }}</h4>
+                                                <small class="text-muted">Avg. Points<br>{{ match.team2 }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">Match insights being analyzed. Check back soon.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-3 border-0 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-trophy"></i> Optimal Selection Strategy</h5>
+                                    {% if strategy_recommendation %}
+                                        <p>{{ strategy_recommendation.description }}</p>
+                                        <div class="row mt-3">
+                                            <div class="col-6">
+                                                <h6>Recommended Selections</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="bi bi-check-circle text-success"></i> {{ strategy_recommendation.batsmen }} Batsmen</li>
+                                                    <li><i class="bi bi-check-circle text-success"></i> {{ strategy_recommendation.bowlers }} Bowlers</li>
+                                                    <li><i class="bi bi-check-circle text-success"></i> {{ strategy_recommendation.all_rounders }} All-Rounders</li>
+                                                    <li><i class="bi bi-check-circle text-success"></i> {{ strategy_recommendation.wicket_keepers }} Wicket-Keepers</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-6">
+                                                <h6>Captain Strategy</h6>
+                                                <p class="mb-1"><i class="bi bi-star-fill text-warning"></i> {{ strategy_recommendation.captain_strategy }}</p>
+                                                <p><i class="bi bi-star-half text-warning"></i> {{ strategy_recommendation.vice_captain_strategy }}</p>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">Strategy recommendations are being calculated.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-stars"></i> Top Players to Consider</h5>
+                                    <div class="row">
+                                        {% if top_players %}
+                                            {% for player in top_players[:6] %}
+                                                <div class="col-md-4 col-sm-6 mb-3">
+                                                    <div class="card h-100 border-{% if player.team_name == match.team1 %}primary{% else %}danger{% endif %}">
+                                                        <div class="card-body p-2">
+                                                            <div class="d-flex justify-content-between">
+                                                                <h6 class="card-title mb-0">{{ player.name }}</h6>
+                                                                <span class="badge bg-{% if player.team_name == match.team1 %}primary{% else %}danger{% endif %}">{{ player.role }}</span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mt-2">
+                                                                <small>Form: {{ player.form|round(2) }}</small>
+                                                                <small>Credits: {{ player.credits }}</small>
+                                                            </div>
+                                                            <div class="mt-2">
+                                                                <div class="progress" style="height: 5px;">
+                                                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ player.prediction_confidence * 100 }}%"></div>
+                                                                </div>
+                                                                <small class="text-muted d-block mt-1">Expected points: <strong>{{ player.predicted_points|round|int }}</strong></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="col-12">
+                                                <p class="text-muted">Player predictions are being processed.</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Generate Team</h4>
+        </div>
+        <div class="card-body">
+            <form id="autoGenerateForm" method="POST" action="{{ url_for('frontend.auto_generate_team', match_id=match.id) }}">
+                {{ form.csrf_token }}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.max_players_from_team.id }}">{{ form.max_players_from_team.label }}</label>
+                            {{ form.max_players_from_team(class="form-control" + (" is-invalid" if form.max_players_from_team.errors else ""), min="1", max="7") }}
+                            {% if form.max_players_from_team.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.max_players_from_team.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.strategy.id }}">{{ form.strategy.label }}</label>
+                            {{ form.strategy(class="form-control" + (" is-invalid" if form.strategy.errors else "")) }}
+                            {% if form.strategy.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.strategy.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.form_weight.id }}">{{ form.form_weight.label }}</label>
+                            {{ form.form_weight(class="form-control weight-input" + (" is-invalid" if form.form_weight.errors else ""), min="0", max="1", step="0.1") }}
+                            {% if form.form_weight.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.form_weight.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.credit_weight.id }}">{{ form.credit_weight.label }}</label>
+                            {{ form.credit_weight(class="form-control weight-input" + (" is-invalid" if form.credit_weight.errors else ""), min="0", max="1", step="0.1") }}
+                            {% if form.credit_weight.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.credit_weight.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="alert alert-info" id="validation-feedback">
+                            <strong>Perfect!</strong> Your weights sum to 1.0.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.captain_preference.id }}">{{ form.captain_preference.label }}</label>
+                            {{ form.captain_preference(class="form-control" + (" is-invalid" if form.captain_preference.errors else "")) }}
+                            {% if form.captain_preference.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.captain_preference.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.vice_captain_preference.id }}">{{ form.vice_captain_preference.label }}</label>
+                            {{ form.vice_captain_preference(class="form-control" + (" is-invalid" if form.vice_captain_preference.errors else "")) }}
+                            {% if form.vice_captain_preference.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.vice_captain_preference.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check mb-3">
+                            {{ form.consider_opposition(class="form-check-input") }}
+                            <label class="form-check-label" for="{{ form.consider_opposition.id }}">{{ form.consider_opposition.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mb-3">
+                            {{ form.apply_budget_optimization(class="form-check-input") }}
+                            <label class="form-check-label" for="{{ form.apply_budget_optimization.id }}">{{ form.apply_budget_optimization.label }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn btn-primary" id="generateBtn">Generate Team</button>
+                    <a href="{{ url_for('frontend.match_detail', match_id=match.id) }}" class="btn btn-secondary">Back to Match</a>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p class="mt-2">Generating team... This may take a moment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress-container {
+        width: 100%;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    .progress-bar {
+        height: 20px;
+        background-color: #4CAF50;
+        border-radius: 5px;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+        transition: width 0.5s;
+    }
+    .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .validation-feedback {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .validation-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .validation-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+
+<!-- Pass data to JavaScript in a safe way using data attributes -->
+{% if generated %}
+<div id="chartData" 
+     data-generated="true"
+     data-roles='{{ role_labels|tojson|safe }}'
+     data-counts='{{ role_counts|tojson|safe }}'
+     style="display:none;">
+</div>
+{% endif %}
+
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Include external JavaScript files -->
+<script src="{{ url_for('frontend.static', filename='js/auto_generate_team.js') }}"></script>
+<script src="{{ url_for('frontend.static', filename='js/form_debug.js') }}"></script>
+{% endblock %}

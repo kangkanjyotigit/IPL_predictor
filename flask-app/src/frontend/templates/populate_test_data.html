@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Populate Test Data{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Test Data Population</h4>
+        </div>
+        <div class="card-body">
+            {% if success %}
+            <div class="alert alert-success">
+                <h5>Test Data Successfully Populated!</h5>
+                <p>The database has been populated with test data for development and testing purposes.</p>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5>Data Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Matches</h6>
+                            <ul class="list-group">
+                                {% for match in matches %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ match.team1 }} vs {{ match.team2 }}
+                                    <span class="badge bg-primary rounded-pill">ID: {{ match.id }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Teams</h6>
+                            <ul class="list-group">
+                                {% for team_name, count in teams.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ team_name }}
+                                    <span class="badge bg-primary rounded-pill">{{ count }} players</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Player Roles</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Role</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for role, count in roles.items() %}
+                                    <tr>
+                                        <td>{{ role }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-danger">
+                <h5>Error Populating Test Data</h5>
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{{ url_for('frontend.matches') }}" class="btn btn-primary">Go to Matches</a>
+                <a href="{{ url_for('frontend.dashboard') }}" class="btn btn-secondary">Go to Dashboard</a>
+                {% if success %}
+                <a href="{{ url_for('frontend.debug_auto_generate', match_id=matches[0].id) }}" class="btn btn-success">Debug Auto-Generate</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

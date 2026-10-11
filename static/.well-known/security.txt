@@ -1,0 +1,5 @@
+Contact: mailto:security@dreamkaro.com
+Encryption: https://dreamkaro.com/pgp-key.txt
+Acknowledgments: https://dreamkaro.com/thanks
+Preferred-Languages: en
+Canonical: https://dreamkaro.com/.well-known/security.txt

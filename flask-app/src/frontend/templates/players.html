@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Players{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Players</h1>
+    
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ url_for('frontend.players') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Player name...">
+                </div>
+                <div class="col-md-3">
+                    <label for="team" class="form-label">Team</label>
+                    <select class="form-select" id="team" name="team">
+                        <option value="all" {% if current_team == 'all' %}selected{% endif %}>All Teams</option>
+                        {% for team_name in team_names %}
+                            <option value="{{ team_name }}" {% if current_team == team_name %}selected{% endif %}>{{ team_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="role" class="form-label">Player Role</label>
+                    <select class="form-select" id="role" name="role">
+                        <option value="all" {% if current_role == 'all' %}selected{% endif %}>All Roles</option>
+                        <option value="Batsman" {% if current_role == 'Batsman' %}selected{% endif %}>Batsman</option>
+                        <option value="Bowler" {% if current_role == 'Bowler' %}selected{% endif %}>Bowler</option>
+                        <option value="All-rounder" {% if current_role == 'All-rounder' %}selected{% endif %}>All-rounder</option>
+                        <option value="Wicket-keeper" {% if current_role == 'Wicket-keeper' %}selected{% endif %}>Wicket-keeper</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Players List -->
+    <div class="row">
+        {% if players %}
+            {% for player in players %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ player.name }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ player.team_name }}</h6>
+                            <p class="card-text">
+                                <strong>Role:</strong> {{ player.role }}<br>
+                                <strong>Credits:</strong> {{ player.credit_points }}<br>
+                                <strong>Form:</strong> {{ player.current_form }}
+                            </p>
+                            <a href="{{ url_for('frontend.player_detail', player_id=player.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No players found matching your criteria.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

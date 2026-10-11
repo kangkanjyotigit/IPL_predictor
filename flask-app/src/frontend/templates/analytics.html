@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Dream11 Prediction{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Analytics Dashboard</h1>
+    
+    <!-- Overall Stats -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Overall Performance</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card text-center p-3 border rounded">
+                        <h4>Total Teams</h4>
+                        <h2>{{ stats.total_teams }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center p-3 border rounded">
+                        <h4>Matches Played</h4>
+                        <h2>{{ stats.matches_played }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center p-3 border rounded">
+                        <h4>Total Points</h4>
+                        <h2>{{ stats.total_points }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card text-center p-3 border rounded">
+                        <h4>Current Rank</h4>
+                        <h2>#{{ stats.rank if stats.rank else 'N/A' }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Accuracy -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Prediction Accuracy</h3>
+        </div>
+        <div class="card-body">
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: {{ stats.prediction_accuracy }}%;" 
+                     aria-valuenow="{{ stats.prediction_accuracy }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                    {{ "%.1f"|format(stats.prediction_accuracy) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Performance -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Recent Performance</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Match</th>
+                            <th>Points</th>
+                            <th>Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for performance in stats.recent_performance %}
+                        <tr>
+                            <td>{{ performance.match.team1 }} vs {{ performance.match.team2 }}</td>
+                            <td>{{ performance.points }}</td>
+                            <td>#{{ performance.rank if performance.rank else 'N/A' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center">No recent matches found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performing Players -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Top Performing Players</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Role</th>
+                            <th>Form</th>
+                            <th>Average Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in top_players %}
+                        <tr>
+                            <td>{{ player.name }}</td>
+                            <td>{{ player.role }}</td>
+                            <td>{{ "%.1f"|format(player.current_form) }}</td>
+                            <td>{{ "%.1f"|format(player.average_points) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No player data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.stat-card {
+    background-color: #f8f9fa;
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.progress-bar {
+    background-color: #28a745;
+}
+</style>
+{% endblock %}
