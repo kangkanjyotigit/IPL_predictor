@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'users.apps.UsersConfig',
     'matches',
-    'fantasy',
     #'contests',
     #'csp',
 ]

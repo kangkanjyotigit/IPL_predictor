@@ -17,6 +17,9 @@ class Player(models.Model):
     nationality = models.CharField(max_length=50)
     date_of_birth = models.DateField()
     
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return f"{self.name} ({self.role})"
 
@@ -26,6 +29,9 @@ class Team(models.Model):
     country = models.CharField(max_length=100)
     players = models.ManyToManyField(Player, through='TeamPlayer')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -84,7 +90,7 @@ class Match(models.Model):
         ordering = ['-match_date']
 
 class Over(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='overs')
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='over_records')
     over_number = models.IntegerField()
     bowler = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='overs_bowled')
     runs = models.IntegerField(default=0)

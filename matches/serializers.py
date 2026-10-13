@@ -60,7 +60,7 @@ class MatchSerializer(serializers.ModelSerializer):
     toss_winner_details = TeamSerializer(source='toss_winner', read_only=True)
     batting_team_details = TeamSerializer(source='batting_team', read_only=True)
     bowling_team_details = TeamSerializer(source='bowling_team', read_only=True)
-    overs = OverSerializer(many=True, read_only=True)
+    overs = OverSerializer(source='over_records', many=True, read_only=True)
     player_innings = PlayerInningsSerializer(many=True, read_only=True)
 
     class Meta:
